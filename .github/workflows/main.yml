@@ -10,7 +10,7 @@ jobs:
   build-and-scan:
     runs-on: ubuntu-latest
 
-    # Adicione este bloco de permissões:
+    # Adiciona bloco de permissões:
     permissions:
       contents: read
       issues: write
