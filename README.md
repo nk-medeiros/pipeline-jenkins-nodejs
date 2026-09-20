@@ -61,10 +61,11 @@ npm test       # Executa os testes
 npm start      # Inicia a aplicação
 ```
 
-## Jenkins
+## CI/CD Pipeline (GitHub Actions)
 
-O projeto pode ser utilizado em um pipeline executando as etapas:
+O projeto possui um workflow configurado no GitHub Actions (`.github/workflows/main.yml`) executando as etapas:
 
-```text
-Checkout → npm install → npm run build → npm test → npm start
-```
+1. **Setup & Install:** Instalação das dependências com Node.js 18.
+2. **SAST:** Análise estática de código com **Semgrep** (`p/javascript`).
+3. **Build & Test:** Execução do build (`npm run build`) e testes unitários (`npm test`).
+4. **DAST:** Análise dinâmica de segurança com **OWASP ZAP** rodando contra a aplicação na porta `3000`.
