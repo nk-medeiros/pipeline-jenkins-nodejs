@@ -46,7 +46,8 @@ jobs:
       - name: Start Application for DAST
         run: |
           npm start &
-          npx wait-on http://localhost:3000 --timeout 60000
+          sleep 10
+          curl --retry 10 --retry-delay 3 --retry-connrefused http://127.0.0.1:3000
 
       # 8. Step: DAST (Análise Dinâmica de Segurança com OWASP ZAP)
       # Analisa a aplicação enquanto ela está rodando no servidor local
