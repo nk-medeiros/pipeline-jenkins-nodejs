@@ -1,4 +1,4 @@
-name: Node.js CI Pipeline
+name: Node.js CI/CD Pipeline with SAST & DAST
 
 on:
   push:
@@ -7,24 +7,51 @@ on:
     branches: [ "main", "master" ]
 
 jobs:
-  build-and-test:
+  build-and-scan:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Checkout do código
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2. Configurar ambiente Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
 
-      - name: Install dependencies
+      # 3. Step: Install
+      - name: Install Dependencies
         run: npm ci
 
-      - name: Build project
+      # 4. Step: SAST (Análise Estática de Segurança com Semgrep)
+      # Executado logo após a instalação para identificar falhas no código antes da execução
+      - name: SAST - Semgrep Scan
+        uses: semgrep/semgrep-action@v1
+        with:
+          config: p/javascript
+        continue-on-error: true
+
+      # 5. Step: Build
+      - name: Build
         run: npm run build --if-present
 
-      - name: Run tests
+      # 6. Step: Test
+      - name: Run Tests
         run: npm test
+
+      # 7. Subir a aplicação em segundo plano para o DAST
+      - name: Start Application for DAST
+        run: |
+          npm start &
+          npx wait-on http://localhost:3000 --timeout 60000
+
+      # 8. Step: DAST (Análise Dinâmica de Segurança com OWASP ZAP)
+      # Analisa a aplicação enquanto ela está rodando no servidor local
+      - name: DAST - OWASP ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: 'http://localhost:3000'
+          fail_action: false
