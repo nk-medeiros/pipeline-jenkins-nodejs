@@ -61,14 +61,19 @@ jobs:
           sleep 10
           curl --retry 10 --retry-delay 3 --retry-connrefused http://127.0.0.1:3000
 
-      # 8. DAST - OWASP ZAP
+      # 8. DAST - OWASP ZAP (via docker run, evita bug de upload de artifact da action oficial)
       - name: DAST - OWASP ZAP Baseline Scan
-        uses: zaproxy/action-baseline@v0.12.0
+        run: |
+          docker run --rm --network="host" \
+            -v $(pwd):/zap/wrk/:rw \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py -t http://127.0.0.1:3000 -r zap_report.html -J zap_report.json -I
+        continue-on-error: true
+
+      - name: Upload relatório DAST
+        uses: actions/upload-artifact@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          target: 'http://172.17.0.1:3000'
-          allow_issue_writing: false
-          fail_action: false
-
-
-          
+          name: relatorio-dast
+          path: |
+            zap_report.html
+            zap_report.json
