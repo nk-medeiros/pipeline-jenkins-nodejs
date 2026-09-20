@@ -10,6 +10,16 @@ jobs:
   build-and-scan:
     runs-on: ubuntu-latest
 
+    # Adicione este bloco de permissões:
+    permissions:
+      contents: read
+      issues: write
+      checks: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
     steps:
       # 1. Checkout do código
       - name: Checkout repository
