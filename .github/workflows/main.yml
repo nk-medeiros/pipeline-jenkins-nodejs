@@ -32,13 +32,19 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      # 4. Step: SAST (Análise Estática de Segurança com Semgrep)
-      # Executado logo após a instalação para identificar falhas no código antes da execução
+      # 4. SAST - Semgrep
       - name: SAST - Semgrep Scan
-        uses: semgrep/semgrep-action@v1
-        with:
-          config: p/javascript
+        run: |
+          python3 -m pip install --quiet semgrep
+          semgrep scan --config=p/javascript --config=p/nodejs \
+            --sarif --output=semgrep.sarif
         continue-on-error: true
+
+      - name: Upload relatório SAST
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-sast
+          path: semgrep.sarif
 
       # 5. Step: Build
       - name: Build
@@ -55,11 +61,11 @@ jobs:
           sleep 10
           curl --retry 10 --retry-delay 3 --retry-connrefused http://127.0.0.1:3000
 
-      # 8. Step: DAST (Análise Dinâmica de Segurança com OWASP ZAP)
-      # Analisa a aplicação enquanto ela está rodando no servidor local
+      # 8. DAST - OWASP ZAP
       - name: DAST - OWASP ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.12.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          target: 'http://localhost:3000'
+          target: 'http://172.17.0.1:3000'
+          allow_issue_writing: false
           fail_action: false
