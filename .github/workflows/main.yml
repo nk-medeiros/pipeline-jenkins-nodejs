@@ -77,7 +77,10 @@ jobs:
           docker logs app
           exit 1
 
-      # 9. DAST - OWASP ZAP (via docker run, evita bug de upload de artifact da action oficial)
+      # 9. DAST - OWASP ZAP
+      - name: Preparar permissão para relatórios ZAP
+        run: chmod -R a+w $(pwd)
+
       - name: DAST - OWASP ZAP Baseline Scan
         run: |
           docker run --rm --network="host" \
