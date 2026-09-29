@@ -65,8 +65,17 @@ jobs:
       - name: Start Container for DAST
         run: |
           docker run -d -p 3000:3000 --name app pipeline-jenkins-nodejs:${{ github.sha }}
-          curl --fail --retry 10 --retry-delay 3 --retry-connrefused http://127.0.0.1:3000 \
-            || (docker logs app && exit 1)
+          for i in $(seq 1 15); do
+            if curl --fail --silent http://127.0.0.1:3000 > /dev/null; then
+              echo "Aplicação respondeu na tentativa $i"
+              exit 0
+            fi
+            echo "Aguardando aplicação... tentativa $i"
+            sleep 3
+          done
+          echo "Aplicação não respondeu. Logs do container:"
+          docker logs app
+          exit 1
 
       # 9. DAST - OWASP ZAP (via docker run, evita bug de upload de artifact da action oficial)
       - name: DAST - OWASP ZAP Baseline Scan
