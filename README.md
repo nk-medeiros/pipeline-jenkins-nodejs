@@ -100,9 +100,10 @@ docker run -p 3000:3000 pipeline-jenkins-nodejs  # Executa o container
 
 ## CI/CD Pipeline (GitHub Actions)
 
-O projeto possui um workflow configurado no GitHub Actions (`.github/workflows/main.yml`) executando as etapas:
+O projeto possui um workflow configurado no GitHub Actions (`.github/workflows/main.yml`), executado a cada push e pull request nas branches `main` e `master`, com as etapas:
 
-1. **Setup & Install:** Instalação das dependências com Node.js 18.
-2. **SAST:** Análise estática de código com **Semgrep** (`p/javascript`).
-3. **Build & Test:** Execução do build (`npm run build`) e testes unitários (`npm test`).
-4. **DAST:** Análise dinâmica de segurança com **OWASP ZAP** rodando contra a aplicação na porta `3000`.
+1. **Setup & Install:** instalação das dependências com Node.js 18 (`npm ci`).
+2. **SAST:** análise estática de código com Semgrep (`p/javascript` e `p/nodejs`). O relatório é salvo como artifact (`relatorio-sast`).
+3. **Build & Test:** execução do build (`npm run build`) e dos testes unitários (`npm test`).
+4. **Docker Build:** construção da imagem Docker da aplicação e validação do container em execução na porta `3000`.
+5. **DAST:** análise dinâmica de segurança com OWASP ZAP rodando contra o container. Os relatórios em HTML e JSON são salvos como artifact (`relatorio-dast`).
